@@ -21,6 +21,7 @@
 
 local awful = require("awful")
 local lfs = require("lfs")
+local naughty = require("naughty")
 
 --- Return all current processes
 -- All directories in /proc containing a number represent a process.
@@ -43,8 +44,8 @@ local function processwalker()
 end
 
 -- Replace NUL-separation with spaces
-local function denull(string)
-  return string.gsub(string, "\0", " ")
+local function denull(str)
+   return str:sub( 0, string.len( str) - 1 );
 end
 
 -- Extract core command name
@@ -56,8 +57,10 @@ end
 -- Takes a command with arguments as a single string
 local function run(command)
   assert(type(command) == "string")
+  local command_name = extract(command)
   for process in processwalker() do
-    if extract(denull(process)) == extract(command) then
+     local process_name = extract(denull(process))
+    if process_name == command_name then
       return
     end
   end
