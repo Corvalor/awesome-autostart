@@ -22,6 +22,7 @@
 local awful = require("awful")
 local lfs = require("lfs")
 local naughty = require("naughty")
+local dump = require("dump")
 
 --- Return all current processes
 -- All directories in /proc containing a number represent a process.
@@ -53,15 +54,25 @@ local function extract(string)
   return string.match(string.match(string, "^%S*"), "[^/]-$") or ""
 end
 
+local function starts_with(str, start)
+   return str:sub(1, #start) == start
+end
+
 --- Run command if there is no existing process
 -- Takes a command with arguments as a single string
-local function run(command)
+local function run(command, fluid_command )
   assert(type(command) == "string")
   local command_name = extract(command)
-  for process in processwalker() do
-     local process_name = extract(denull(process))
+  local processes = processwalker()
+  for process in processes do
+    local process_name = extract(denull(process))
     if process_name == command_name then
       return
+    end
+    if fluid_command ~= nil then
+	if starts_with( process_name, fluid_command ) then
+	   return
+	end
     end
   end
   return awful.util.spawn(command)
